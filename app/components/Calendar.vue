@@ -16,45 +16,37 @@
           class="calendar-day"
           @click="openTaskModal(day)"
       >
-          <div class="day-number">{{ day }}</div>
-          <div class="day-content">
-            <Task
-                v-for="task in getTaskForDay(day)"
-                :key="task.id"
-                :task="task"
-                @delete="deleteTask(day, task.id)"
-            />
-          </div>
-        </div>
-      </div>
-      <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
-        <div class="modal-content">
-          <h5>Adicionar Tarefa - {{ selectedDay }}/{{ currentMonth + 1 }}/{{ currentYear }}</h5>
-          <input
-              v-model="newTaskName"
-              type="text"
-              class="form-control mb-3"
-              placeholder="Nome da tarefa"
-              @keyup.enter="addTask"
+        <div class="day-number">{{ day }}</div>
+        <div class="day-content">
+          <ViewTask
+              v-for="task in getTaskForDay(day)"
+              :key="task.id"
+              :task="task"
           />
-          <div class="d-flex justify-content-end gap-2">
-            <button class="btn btn-secondary" @click="closeModal">Cancelar</button>
-            <button class="btn btn-primary" @click="addTask">Adicionar</button>
-          </div>
         </div>
       </div>
     </div>
-
+    <ModalTask
+        :show="showModal"
+        :selectedDay="selectedDay"
+        :currentMonth="currentMonth"
+        :currentYear="currentYear"
+        :tasks="getTaskForDay(selectedDay)"
+        @close="closeModal"
+        @add="addTask"
+        @delete="deleteTask"
+    />
+  </div>
 </template>
 
 <script setup>
-import Task from './Task.vue'
+import ViewTask from './ViewTask.vue';
+import ModalTask from './ModalTask.vue';
 
 const currentYear = ref(new Date().getFullYear());
 const currentMonth = ref(new Date().getMonth());
 const showModal = ref(false);
 const selectedDay = ref(null);
-const newTaskName = ref('');
 const tasks = ref({});
 
 const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
@@ -96,39 +88,35 @@ const openTaskModal = (day) => {
 
 const closeModal = () => {
   showModal.value = false;
-  newTaskName.value = '';
 };
 
 const getDateKey = (day) => {
   return `${currentYear.value}-${currentMonth.value}-${day}`;
 };
 
-const addTask = () => {
-  if (!newTaskName.value.trim()) return;
+const addTask = (taskName) => {
   const dateKey = getDateKey(selectedDay.value);
   if (!tasks.value[dateKey]) {
     tasks.value[dateKey] = [];
   }
-
   tasks.value[dateKey].push({
     id: Date.now(),
-    name: newTaskName.value.trim()
+    name: taskName
   });
-  closeModal();
-}
+};
 
-const deleteTask = (day, taskId) => {
-  const dateKey = getDateKey(day);
+const deleteTask = (taskId) => {
+  const dateKey = getDateKey(selectedDay.value);
   if (tasks.value[dateKey]) {
     tasks.value[dateKey] = tasks.value[dateKey].filter(task => task.id !== taskId);
   }
 };
 
 const getTaskForDay = (day) => {
+  if (!day) return [];
   const dateKey = getDateKey(day);
   return tasks.value[dateKey] || [];
-}
-
+};
 </script>
 
 <style scoped>
@@ -172,26 +160,5 @@ const getTaskForDay = (day) => {
 .calendar-day:not(.empty):hover {
   background-color: #f8f9fa;
   cursor: pointer;
-}
-
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.modal-content {
-  background: white;
-  padding: 24px;
-  border-radius: 8px;
-  min-width: 400px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 </style>
