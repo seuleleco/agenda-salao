@@ -14,6 +14,7 @@
           v-for="day in daysInMonth"
           :key="day"
           class="calendar-day"
+          :class="{ 'today': isToday(day) }"
           @click="openTaskModal(day)"
       >
         <div class="day-number">{{ day }}</div>
@@ -62,6 +63,13 @@ const startDay = computed(() => {
 const daysInMonth = computed(() => {
   return new Date(currentYear.value, currentMonth.value + 1, 0).getDate();
 });
+
+const isToday = (day) => {
+  const today = new Date();
+  return day === today.getDate() &&
+  currentMonth.value === today.getMonth() &&
+  currentYear.value === today.getFullYear();
+};
 
 const previousMonth = () => {
   if (currentMonth.value === 0) {
@@ -161,4 +169,21 @@ const getTaskForDay = (day) => {
   background-color: #f8f9fa;
   cursor: pointer;
 }
+
+/*.calendar-day.today {
+  background-color: rgba(227, 242, 253, 0.96);
+}*/
+
+.calendar-day.today .day-number {
+  color: #1976d2;
+  font-weight: bold;
+  border: 1px solid #2196f3;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 </style>
