@@ -56,6 +56,23 @@ const monthNames = [
   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
 ];
 
+const loadTask = async () => {
+  const data = await $fetch('/api/tasks');
+  tasks.value = {};
+  data.forEach(task => {
+    const date = new Date(task.date);
+    const dateKey = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+    if (!tasks.value[dateKey]) {
+      tasks.value[dateKey] = []
+    }
+    tasks.value[dateKey].push(task);
+  });
+}
+
+onMounted(() => {
+  loadTask();
+})
+
 const startDay = computed(() => {
   return new Date(currentYear.value, currentMonth.value, 1).getDay();
 });
@@ -102,18 +119,21 @@ const getDateKey = (day) => {
   return `${currentYear.value}-${currentMonth.value}-${day}`;
 };
 
-const addTask = (taskName) => {
+const addTask = async (taskName) => {
+  const date = new Date(currentYear.value, currentMonth.value, selectedDay.value);
+  const task = await $fetch('/api/tasks', {
+    method: 'POST',
+    body: { name: taskName, date: date.toISOString() }
+  });
   const dateKey = getDateKey(selectedDay.value);
   if (!tasks.value[dateKey]) {
     tasks.value[dateKey] = [];
   }
-  tasks.value[dateKey].push({
-    id: Date.now(),
-    name: taskName
-  });
+  tasks.value[dateKey].push(task);
 };
 
-const deleteTask = (taskId) => {
+const deleteTask = async (taskId) => {
+  await $fetch(`/api/tasks/${taskId}`, { method: 'DELETE' });
   const dateKey = getDateKey(selectedDay.value);
   if (tasks.value[dateKey]) {
     tasks.value[dateKey] = tasks.value[dateKey].filter(task => task.id !== taskId);
