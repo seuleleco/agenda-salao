@@ -49,6 +49,7 @@
                 placeholder="Nome"
                 @keyup.enter="handleAdd"
             />
+              <SelectHour v-model="taskHour" />
             </div>
           </div>
         </div>
