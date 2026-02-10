@@ -33,7 +33,7 @@
                   @click="selectedTask = task"
                   style="cursor: pointer;"
               >
-                <span>{{ task.name }}</span>
+                <span class="text-black">{{ task.name }}</span>
               </div>
               </div>
               <div v-else class="text-center text-body-tertiary">
@@ -45,16 +45,16 @@
             <input
                 v-model="taskName"
                 type="text"
-                class="form-control"
+                class="form-control mb-1"
                 placeholder="Nome"
                 @keyup.enter="handleAdd"
             />
-              <SelectHour v-model="taskHour" />
+              <SelectHour v-model="taskHour" v-model:end-Time="taskEndHour" />
             </div>
           </div>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-primary" @click="showAddTask = !showAddTask">{{ showAddTask ? '- Nova Tarefa' : '+ Nova Tarefa'}}</button>
+          <button v-if="!selectedTask" class="btn btn-primary" @click="showAddTask = !showAddTask">{{ showAddTask ? '- Nova Tarefa' : '+ Nova Tarefa'}}</button>
           <button v-if="selectedTask" type="button" class="btn btn-secondary" @click="selectedTask = null">Voltar</button>
           <button v-else type="button" class="btn btn-secondary" @click="closeModal">Fechar</button>
           <button v-if="!selectedTask" type="button" class="btn btn-primary" @click="handleAdd">Adicionar</button>
